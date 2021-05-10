@@ -8,6 +8,8 @@ import re
 import requests
 import os
 
+from csvMethods import *
+
 # Configuration
 CLIENT_ID = "841369937188487199"
 CLIENT_SECRET = "FfN8yhGDUcg9ZwmqgIYzMTTeVRBByt9A"
@@ -95,9 +97,18 @@ def logout():
 def home():
     username = "world"
     if 'id' in request.cookies and request.cookies['id'] in users:
-        return render_template('index.html', username=username)
+        return redirect(url_for("loot"))
     else:
         return redirect("/login")
+
+@app.route("/loot")
+def loot():
+    reader = readcsv('loot.csv')
+    dates = []
+    for i in range(1, len(reader)):
+        if(reader[i][1] not in dates):
+            dates.append(reader[i][1])
+    return render_template('loot.html', reader=reader, len=len(reader), dates=dates)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Wowhead tooltip script -->
+        <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+        <script src="https://wow.zamimg.com/widgets/power.js"></script>
+        
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+       <!-- Bootstrap CSS -->
+       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+       
+
+       <title>Lootadmin</title>
+    </head>
+    <body>
+
+        <h1 class="display-4" style="text-align:center;">Loot table</h1><br><br>
+
+        <div id="update">
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr class="table-active">
+                        <th scope="col"> CHARACTER</th>
+                        
+                        {% for date in dates %}
+                        <th scope="col"> {{date}}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for i in range (1,len) %}
+                    <tr>
+                        <th scope="row"> {{reader[i][0]}} </th>
+                        
+                        {% for i in range(dates.index(reader[i][1])) %}
+                        <td>
+                        {% endfor %}
+                        <td>
+                            <a href="https://tbc.wowhead.com/item={{reader[i][5]}}" data-wowhead="item={{reader[i][5]}}">
+                     
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </body>
+</html>
