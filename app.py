@@ -9,6 +9,7 @@ import requests
 import os
 
 from csvMethods import *
+from io import StringIO
 
 # Configuration
 CLIENT_ID = "841369937188487199"
@@ -97,18 +98,33 @@ def logout():
 def home():
     username = "world"
     if 'id' in request.cookies and request.cookies['id'] in users:
-        return redirect(url_for("loot"))
+        return redirect(url_for("input"))
     else:
         return redirect("/login")
 
-@app.route("/loot")
+
+@app.route("/input", methods=['GET', 'POST'])
+def input():
+    if request.method == 'POST':
+        session['csv'] = request.form.get('loot_csv')
+        return redirect(url_for("loot"))
+    
+    return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input class="button" type="submit" value="Submit"></form>'
+
+@app.route("/loot/")
 def loot():
-    reader = readcsv('loot.csv')
-    dates = []
-    for i in range(1, len(reader)):
-        if(reader[i][1] not in dates):
-            dates.append(reader[i][1])
-    return render_template('loot.html', reader=reader, len=len(reader), dates=dates)
+    if 'id' not in request.cookies or request.cookies['id'] not in users:
+        return 'no u'
+
+    csv = session.get('csv', None)
+
+    f = StringIO(csv)
+
+
+    characters, dates = readrawcsv(f)
+
+
+    return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
 
 if __name__ == "__main__":

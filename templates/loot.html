@@ -34,16 +34,32 @@
                 </thead>
 
                 <tbody>
-                    {% for i in range (1,len) %}
+                    {% for i in range (len) %}
                     <tr>
-                        <th scope="row"> {{reader[i][0]}} </th>
+                        <th scope="row"> {{characters[i][0]}} </th>
                         
-                        {% for i in range(dates.index(reader[i][1])) %}
+                        
+                        {% for j in range(datelen) %}
                         <td>
-                        {% endfor %}
-                        <td>
-                            <a href="https://tbc.wowhead.com/item={{reader[i][5]}}" data-wowhead="item={{reader[i][5]}}">
-                     
+                        
+                            
+
+                            {% for k in range(2) %}
+
+                            
+ 
+                            <a href="https://tbc.wowhead.com/item={{characters[i][j+1][k]}}" data-wowhead="item={{characters[i][j+1][k]}}">
+                                <br>
+                            
+
+                            
+             
+                                {% endfor %}
+                            </td>
+                                
+                        
+                    {% endfor %}
+                        
                     </tr>
                     {% endfor %}
                 </tbody>
