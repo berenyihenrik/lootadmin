@@ -41,6 +41,11 @@ def make_session(token=None, state=None, scope=None):
         auto_refresh_url='https://discord.com/api/oauth2/token'
 )
 
+def checkLogin():
+    if 'id' in request.cookies and request.cookies['id'] in users:
+        return True
+    return False
+
 
 @app.route("/login")
 def login():
@@ -96,8 +101,7 @@ def logout():
 
 @app.route("/")
 def home():
-    username = "world"
-    if 'id' in request.cookies and request.cookies['id'] in users:
+    if checkLogin():
         return redirect(url_for("input"))
     else:
         return redirect("/login")
@@ -105,27 +109,28 @@ def home():
 
 @app.route("/input", methods=['GET', 'POST'])
 def input():
-    if request.method == 'POST':
-        session['csv'] = request.form.get('loot_csv')
-        return redirect(url_for("loot"))
-    
-    return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input class="button" type="submit" value="Submit"></form>'
+    if checkLogin():
+        if request.method == 'POST':
+            session['csv'] = request.form.get('loot_csv')
+            return redirect(url_for("loot"))
+
+        return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input class="button" type="submit" value="Submit"></form>'
+
+    else:
+        return redirect("/login")
 
 @app.route("/loot/")
 def loot():
-    if 'id' not in request.cookies or request.cookies['id'] not in users:
-        return 'no u'
+    if checkLogin():
+        csv = session.get('csv', None)
+        f = StringIO(csv)
 
-    csv = session.get('csv', None)
+        characters, dates = readrawcsv(f)
 
-    f = StringIO(csv)
+        return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
-
-    characters, dates = readrawcsv(f)
-
-
-    return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
-
+    else:
+        return redirect("/login")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', ssl_context="adhoc")
