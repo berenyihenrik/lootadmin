@@ -3,6 +3,8 @@ from oauthlib.oauth2 import WebApplicationClient
 from urllib.parse import urlencode
 from requests_oauthlib import OAuth2Session
 
+from flask_session import Session
+
 import json
 import re
 import requests
@@ -18,7 +20,8 @@ CLIENT_SECRET = "FfN8yhGDUcg9ZwmqgIYzMTTeVRBByt9A"
 # Flask app setup
 app = Flask(__name__)
 app.config["DEBUG"] = True
-
+app.config['SESSION_TYPE'] = 'filesystem'  # Specifies the token cache should be stored in server-side session
+Session(app)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 
 # OAuth 2 client setup
@@ -123,6 +126,7 @@ def input():
 def loot():
     if checkLogin():
         csv = session.get('csv', None)
+        print(csv)
         f = StringIO(csv)
 
         characters, dates = readrawcsv(f)
