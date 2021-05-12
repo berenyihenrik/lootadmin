@@ -9,14 +9,14 @@ def readcsv(filename):
 
         dates = []
         for i in range(1, len(rows)):
-            if (rows[i][1] not in dates):
+            if rows[i][1] not in dates:
                 dates.append(rows[i][1])
         # print(dates)
 
         characters = []
         character = []
         for i in range(1, len(rows)):
-            if(arrayContains(rows[i][0], characters)):
+            if arrayContains(rows[i][0], characters):
                 character.append(rows[i][0])
                 # character.append(rows[i][1])
                 for j in range(len(dates)):
@@ -28,7 +28,7 @@ def readcsv(filename):
                 character = []
             else:
                 for j in range(len(characters)):
-                    if(characters[j][0] == rows[i][0]):
+                    if characters[j][0] == rows[i][0]:
                         characters[j][dates.index(rows[i][1])+1].append(rows[i][5])
 
 
@@ -44,14 +44,14 @@ def readrawcsv(stringio):
 
     dates = []
     for i in range(1, len(rows)):
-        if (rows[i][1] not in dates):
+        if rows[i][1] not in dates:
             dates.append(rows[i][1])
     # print(dates)
 
     characters = []
     character = []
     for i in range(1, len(rows)):
-        if (arrayContains(rows[i][0], characters)):
+        if arrayContains(rows[i][0], characters):
             character.append(rows[i][0])
             # character.append(rows[i][1])
             for j in range(len(dates)):
@@ -63,7 +63,7 @@ def readrawcsv(stringio):
             character = []
         else:
             for j in range(len(characters)):
-                if (characters[j][0] == rows[i][0]):
+                if characters[j][0] == rows[i][0]:
                     characters[j][dates.index(rows[i][1]) + 1].append(rows[i][5])
 
     # print(characters)
@@ -71,6 +71,6 @@ def readrawcsv(stringio):
 
 def arrayContains(item, array):
     for i in range(len(array)):
-        if(item in array[i]):
+        if item in array[i]:
             return False
     return True
