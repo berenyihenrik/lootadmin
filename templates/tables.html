@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Wowhead tooltip script -->
+        <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+        <script src="https://wow.zamimg.com/widgets/power.js"></script>
+        
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+       <!-- Bootstrap CSS -->
+       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+       
+
+       <title>Lootadmin</title>
+    </head>
+    <body>
+
+       You have {{tables|length}} tables
+       
+       {% for i in range(tables|length) %}
+       <form method="POST" action="{{ url_for('loot') }}">
+         <input type="hidden" name="table" value="{{tables[i]}}">
+         <button type="submit" name="table" value="{{i}}" class="link-button">
+           {{i+1}}
+         </button>
+       </form>
+       {% endfor %}
+       <form method="POST"> <input class="button" type="submit" value="Create new table"></form>
+
+
+    </body>
+</html>

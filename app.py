@@ -4,11 +4,14 @@ from urllib.parse import urlencode
 from requests_oauthlib import OAuth2Session
 
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 import json
 import re
 import requests
 import os
+
 
 from csvMethods import *
 from io import StringIO
@@ -22,12 +25,84 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 app.config['SESSION_TYPE'] = 'filesystem'  # Specifies the token cache should be stored in server-side session
 Session(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+db = SQLAlchemy(app)
+
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
 
 # OAuth 2 client setup
 client = WebApplicationClient(CLIENT_ID)
 
 users = []
+
+class users_db(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=False, nullable=False)
+
+    def __init__(self, id, name):
+        self.id = id
+        self.username = name
+
+class lootTables_db(db.Model):
+    tableid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer)
+
+    def __init__(self, userid):
+        self.userid = userid
+
+class loot_db(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    tableid = db.Column(db.Integer)
+    character = db.Column(db.String(80), unique=False, nullable=False)
+    date = db.Column(db.String(80), unique=False, nullable=False)
+    itemid = db.Column(db.Integer)
+
+    def __init__(self, tableid, character, date, itemid):
+        self.tableid = tableid
+        self.character = character
+        self.date = date
+        self.itemid = itemid
+
+def readrawcsv(stringio):
+    reader = csv.reader(stringio)
+    rows = []
+    for row in reader:
+        rows.append(row)
+
+    dates = []
+    for i in range(1, len(rows)):
+        if rows[i][1] not in dates:
+            dates.append(rows[i][1])
+
+    characters = []
+    character = []
+    for i in range(1, len(rows)):
+        if arrayContains(rows[i][0], characters):
+            character.append(rows[i][0])
+            for j in range(len(dates)):
+                character.append([])
+
+            character[dates.index(rows[i][1]) + 1].append(rows[i][5])
+
+            characters.append(character)
+            character = []
+        else:
+            for j in range(len(characters)):
+                if characters[j][0] == rows[i][0]:
+                    characters[j][dates.index(rows[i][1]) + 1].append(rows[i][5])
+
+
+    user = users_db.query.filter_by().first()
+    tableid = lootTables_db.query.order_by(text("loot_tables_db.tableid DESC")).first()
+    print(tableid.tableid)
+    for i in range(1, len(rows)):
+
+        loot = loot_db(tableid.tableid, rows[i][0], rows[i][1], rows[i][5])
+        db.session.add(loot)
+    db.session.commit()
+
+    return characters, dates
 
 def make_session(token=None, state=None, scope=None):
     return OAuth2Session(
@@ -84,18 +159,27 @@ def callback():
     discord = make_session(token=token_response.json())
     user = discord.get(API_ENDPOINT + '/users/@me').json()
 
-    print(user)
+    # print(user)
 
     resp = make_response(redirect(url_for("home")))
     resp.set_cookie('id', user['id'])
     users.append(user['id'])
+
+    found_user = users_db.query.filter_by(id=request.cookies['id']).first()
+    if found_user:
+        print("user was already in the database")
+    else:
+        usr = users_db(user['id'], user['username'])
+        db.session.add(usr)
+        db.session.commit()
+        print("added user to database")
 
     return resp
 
 
 @app.route("/logout")
 def logout():
-    if 'id' in request.cookies and request.cookies['id'] in users:
+    if checkLogin():
         users.remove(request.cookies['id'])
         resp = make_response(redirect(url_for("home")))
         resp.set_cookie('id', '', expires=0)
@@ -105,7 +189,24 @@ def logout():
 @app.route("/")
 def home():
     if checkLogin():
-        return redirect(url_for("input"))
+        return redirect(url_for("tables"))
+    else:
+        return redirect("/login")
+
+@app.route("/tables", methods=['GET', 'POST'])
+def tables():
+    if checkLogin():
+        if request.method == 'POST':
+            return redirect(url_for("input"))
+        else:
+            tables = []
+            user = users_db.query.filter_by(id=request.cookies['id']).first()
+            table = lootTables_db.query.filter_by(userid=user.id).all()
+            for i in range(len(table)):
+                tables.append(table[i].tableid)
+
+            return render_template("tables.html", tables=tables)
+
     else:
         return redirect("/login")
 
@@ -115,6 +216,12 @@ def input():
     if checkLogin():
         if request.method == 'POST':
             session['csv'] = request.form.get('loot_csv')
+
+            user = users_db.query.filter_by(id=request.cookies['id']).first()
+            table = lootTables_db(user.id)
+            db.session.add(table)
+            db.session.commit()
+
             return redirect(url_for("loot"))
 
         return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input class="button" type="submit" value="Submit"></form>'
@@ -122,14 +229,51 @@ def input():
     else:
         return redirect("/login")
 
-@app.route("/loot/")
+@app.route("/loot/", methods=['GET', 'POST'])
 def loot():
     if checkLogin():
-        csv = session.get('csv', None)
-        print(csv)
-        f = StringIO(csv)
+        if request.method == 'POST':
+            rows = []
+            row = []
+            tableid = request.form.get('table')
+            tables = []
+            user = users_db.query.filter_by(id=request.cookies['id']).first()
+            loot = loot_db.query.filter_by(tableid=tableid).all()
+            for i in range(len(loot)):
+                row.append(loot[i].character)
+                row.append(loot[i].date)
+                row.append(loot[i].itemid)
+                rows.append(row)
+                row = []
 
-        characters, dates = readrawcsv(f)
+            dates = []
+            for i in range(len(rows)):
+                if rows[i][1] not in dates:
+                    dates.append(rows[i][1])
+
+            characters = []
+            character = []
+            for i in range(len(rows)):
+                if arrayContains(rows[i][0], characters):
+                    character.append(rows[i][0])
+                    # character.append(rows[i][1])
+                    for j in range(len(dates)):
+                        character.append([])
+
+                    character[dates.index(rows[i][1]) + 1].append(rows[i][2])
+
+                    characters.append(character)
+                    character = []
+                else:
+                    for j in range(len(characters)):
+                        if characters[j][0] == rows[i][0]:
+                            characters[j][dates.index(rows[i][1]) + 1].append(rows[i][2])
+
+        else:
+            csv = session.get('csv', None)
+            f = StringIO(csv)
+
+            characters, dates = readrawcsv(f)
 
         return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
@@ -137,4 +281,7 @@ def loot():
         return redirect("/login")
 
 if __name__ == "__main__":
+    db.create_all()
     app.run(host='0.0.0.0', ssl_context="adhoc")
+
+
