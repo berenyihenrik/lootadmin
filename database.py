@@ -12,9 +12,11 @@ class users_db(db.Model):
 class lootTables_db(db.Model):
     tableid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer)
+    shareable = db.Column(db.Boolean)
 
     def __init__(self, userid):
         self.userid = userid
+        self.shareable = 1
 
 class loot_db(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

@@ -175,6 +175,22 @@ def loot():
     else:
         return redirect("/login")
 
+
+@app.route("/shared", methods=['GET'])
+def shared():
+    if checkLogin(request, users):
+        try:
+            tableid = request.args.get('tableid')
+            if lootTables_db.query.filter_by(tableid=tableid).first().shareable == 1:
+                characters, dates = readDB(tableid)
+                return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
+            else:
+                return 'THIS TABLE IS ONLY AVAILABLE TO THE OWNER'
+        except:
+            return 'INVALID TABLE ID'
+    else:
+        return redirect("/login")
+
 if __name__ == "__main__":
     db.create_all()
     app.run(host='0.0.0.0', ssl_context="adhoc")
