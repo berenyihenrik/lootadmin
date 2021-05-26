@@ -14,6 +14,8 @@ from database import *
 CLIENT_ID = "841369937188487199"
 CLIENT_SECRET = "FfN8yhGDUcg9ZwmqgIYzMTTeVRBByt9A"
 
+REDIRECT = 'https://discord.com/api/oauth2/authorize?client_id=841369937188487199&redirect_uri=https%3A%2F%2Flootadmin.xyz%2Flogin%2Fcallback&response_type=code&scope=identify'
+
 # Flask app setup
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -36,7 +38,7 @@ def make_session(token=None, state=None, scope=None):
         token=token,
         state=state,
         scope=scope,
-        redirect_uri='http://localhost:5000/login/callback'
+        redirect_uri=REDIRECT
 ,
         auto_refresh_kwargs={
             'client_id': CLIENT_ID,
@@ -48,11 +50,10 @@ def make_session(token=None, state=None, scope=None):
 
 @app.route("/login") # login page; uses Discord OAuth2
 def login():
-    authorization_endpoint = 'https://discord.com/api/oauth2/authorize?client_id=841369937188487199&redirect_uri=https%3A%2F%2F0.0.0.0%3A5000%2Flogin%2Fcallback&response_type=code&scope=identify'
+    authorization_endpoint = REDIRECT
 
     request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request.base_url + "/callback"
+        authorization_endpoint
     )
     return redirect(request_uri)
 
@@ -62,6 +63,8 @@ def callback():
     # Get authorization code
     code = request.args.get("code")
 
+    print(code)
+
     # Prepare and send a request to get tokens! Yay tokens!
     API_ENDPOINT = 'https://discord.com/api/v8'
     data = {
@@ -69,22 +72,28 @@ def callback():
         'client_secret': CLIENT_SECRET,
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': request.base_url
-    }
+        'redirect_uri': 'https://lootadmin.xyz/login/callback'
+   }
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
     token_response = requests.post('%s/oauth2/token' % API_ENDPOINT, data=data, headers=headers)
+    
+
+    print(request.base_url)
+    print(token_response.json())
 
     # Parse the tokens!
     discord = make_session(token=token_response.json())
     user = discord.get(API_ENDPOINT + '/users/@me').json()
+   
 
+    
     resp = make_response(redirect(url_for("home")))
     resp.set_cookie('id', user['id'])
     users.append(user['id'])
-
-    found_user = users_db.query.filter_by(id=request.cookies['id']).first()
+    print(request.cookies)
+    found_user = users_db.query.filter_by(id=user['id']).first()
     if found_user:
         print("user was already in the database")
     else:
