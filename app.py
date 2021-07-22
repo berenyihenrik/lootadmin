@@ -64,7 +64,7 @@ def callback():
     code = request.args.get("code")
 
 
-    # Prepare and send a request to get tokens! Yay tokens!
+    # Prepare and send a request to get tokens!
     API_ENDPOINT = 'https://discord.com/api/v8'
     data = {
         'client_id': CLIENT_ID,
@@ -143,8 +143,15 @@ def input():
 
             user = users_db.query.filter_by(id=request.cookies['id']).first()
             table = lootTables_db(user.id)
+            session['table'] = table.tableid
             db.session.add(table)
             db.session.commit()
+
+            tableid = table.tableid
+            csv = request.form.get('loot_csv')
+            f = StringIO(csv)
+            characters, dates = readrawcsv(f, tableid)
+            session['table'] = table.tableid
 
             return redirect(url_for("loot"))
 
@@ -153,22 +160,43 @@ def input():
     else:
         return redirect("/login")
 
+@app.route("/append", methods=['GET', 'POST'])
+def append():
+    if checkLogin(request, users):
+        if request.method == 'POST':
+            session['csv'] = request.form.get('loot_csv')
+
+            table = lootTables_db.query.filter_by(tableid=request.form.get('tableid')).first()
+
+            tableid = table.tableid
+            csv = request.form.get('loot_csv')
+            f = StringIO(csv)
+            characters, dates = readrawcsv(f, tableid)
+            session['table'] = table.tableid
+
+            return redirect(url_for("loot"))
+        else:
+            print(request.args.get("tableid"))
+
+        return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input type="hidden" name="tableid" value="{0}"> <input class="button" type="submit" value="Submit"></form>'.format(request.args.get("tableid"))
+
+    else:
+        return redirect("/login")
+
 @app.route("/loot/", methods=['GET', 'POST'])
 def loot():
     if checkLogin(request, users):
         if request.method == 'POST':
-            characters, dates = readDB(request.form.get('table'))
-            print(characters)
+            session['table'] = request.form.get('table')
 
-            return redirect("/loot")
+            return redirect(url_for("loot"))
 
         else:
-            csv = session.get('csv', None)
-            f = StringIO(csv)
+            print("NONE", session.get('table'))
+            characters, dates = readDB(session.get('table'))
+            print(characters)
 
-            characters, dates = readrawcsv(f)
-
-            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
+            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates), tableid=session.get('table'))
 
     else:
         return redirect("/login")

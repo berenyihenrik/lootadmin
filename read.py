@@ -39,7 +39,7 @@ def readcsv(filename):
         file.close()
         return characters, dates
 
-def readrawcsv(stringio):
+def readrawcsv(stringio, tableid = None):
     reader = csv.reader(stringio)
     rows = []
     for row in reader:
@@ -67,12 +67,14 @@ def readrawcsv(stringio):
                 if characters[j][0] == rows[i][0]:
                     characters[j][dates.index(rows[i][1]) + 1].append(rows[i][5])
 
+    if tableid == None:
+        table = lootTables_db.query.order_by(text("loot_tables_db.tableid DESC")).first()
+        tableid = table.tableid
+    print(tableid)
 
-    tableid = lootTables_db.query.order_by(text("loot_tables_db.tableid DESC")).first()
-    print(tableid.tableid)
     for i in range(1, len(rows)):
 
-        loot = loot_db(tableid.tableid, rows[i][0], rows[i][1], rows[i][5])
+        loot = loot_db(tableid, rows[i][0], rows[i][1], rows[i][5])
         db.session.add(loot)
     db.session.commit()
 
