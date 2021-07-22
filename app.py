@@ -14,7 +14,7 @@ from database import *
 CLIENT_ID = "841369937188487199"
 CLIENT_SECRET = "FfN8yhGDUcg9ZwmqgIYzMTTeVRBByt9A"
 
-REDIRECT = 'https://discord.com/api/oauth2/authorize?client_id=841369937188487199&redirect_uri=https%3A%2F%2Flootadmin.xyz%2Flogin%2Fcallback&response_type=code&scope=identify'
+REDIRECT = 'https://discord.com/api/oauth2/authorize?client_id=841369937188487199&redirect_uri=https%3A%2F%2F0.0.0.0%3A5000%2Flogin%2Fcallback&response_type=code&scope=identify'
 
 # Flask app setup
 app = Flask(__name__)
@@ -63,7 +63,6 @@ def callback():
     # Get authorization code
     code = request.args.get("code")
 
-    print(code)
 
     # Prepare and send a request to get tokens! Yay tokens!
     API_ENDPOINT = 'https://discord.com/api/v8'
@@ -72,16 +71,13 @@ def callback():
         'client_secret': CLIENT_SECRET,
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': 'https://lootadmin.xyz/login/callback'
+        'redirect_uri': 'https://0.0.0.0:5000/login/callback'
    }
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
     token_response = requests.post('%s/oauth2/token' % API_ENDPOINT, data=data, headers=headers)
-    
 
-    print(request.base_url)
-    print(token_response.json())
 
     # Parse the tokens!
     discord = make_session(token=token_response.json())
@@ -92,7 +88,7 @@ def callback():
     resp = make_response(redirect(url_for("home")))
     resp.set_cookie('id', user['id'])
     users.append(user['id'])
-    print(request.cookies)
+
     found_user = users_db.query.filter_by(id=user['id']).first()
     if found_user:
         print("user was already in the database")
@@ -164,13 +160,15 @@ def loot():
             characters, dates = readDB(request.form.get('table'))
             print(characters)
 
+            return redirect("/loot")
+
         else:
             csv = session.get('csv', None)
             f = StringIO(csv)
 
             characters, dates = readrawcsv(f)
 
-        return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
+            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
     else:
         return redirect("/login")
@@ -178,18 +176,16 @@ def loot():
 
 @app.route("/shared", methods=['GET'])
 def shared():
-    if checkLogin(request, users):
-        try:
-            tableid = request.args.get('tableid')
-            if lootTables_db.query.filter_by(tableid=tableid).first().shareable == 1:
-                characters, dates = readDB(tableid)
-                return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
-            else:
-                return 'THIS TABLE IS ONLY AVAILABLE TO THE OWNER'
-        except:
-            return 'INVALID TABLE ID'
-    else:
-        return redirect("/login")
+    try:
+        tableid = request.args.get('tableid')
+        if lootTables_db.query.filter_by(tableid=tableid).first().shareable == 1:
+            characters, dates = readDB(tableid)
+            return render_template('sharedloot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
+        else:
+            return 'THIS TABLE IS ONLY AVAILABLE TO THE OWNER'
+    except:
+        return 'INVALID TABLE ID'
+
 
 if __name__ == "__main__":
     db.create_all()
