@@ -78,7 +78,7 @@ def readrawcsv(stringio, tableid = None):
         db.session.add(loot)
     db.session.commit()
 
-    return characters, dates
+    # return characters, dates
 
 def readDB(tableid):
     rows = []

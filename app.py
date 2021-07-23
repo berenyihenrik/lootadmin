@@ -150,7 +150,7 @@ def input():
             tableid = table.tableid
             csv = request.form.get('loot_csv')
             f = StringIO(csv)
-            characters, dates = readrawcsv(f, tableid)
+            readrawcsv(f, tableid)
             session['table'] = table.tableid
 
             return redirect(url_for("loot"))
@@ -166,17 +166,17 @@ def append():
         if request.method == 'POST':
             session['csv'] = request.form.get('loot_csv')
 
-            table = lootTables_db.query.filter_by(tableid=request.form.get('tableid')).first()
+            table = lootTables_db.query.filter_by(tableid=session.get('table')).first()
 
             tableid = table.tableid
             csv = request.form.get('loot_csv')
             f = StringIO(csv)
-            characters, dates = readrawcsv(f, tableid)
+            readrawcsv(f, tableid)
             session['table'] = table.tableid
 
             return redirect(url_for("loot"))
         else:
-            print(request.args.get("tableid"))
+            print(session.get('table'))
 
         return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input type="hidden" name="tableid" value="{0}"> <input class="button" type="submit" value="Submit"></form>'.format(request.args.get("tableid"))
 
@@ -196,7 +196,7 @@ def loot():
             characters, dates = readDB(session.get('table'))
             print(characters)
 
-            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates), tableid=session.get('table'))
+            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
     else:
         return redirect("/login")
