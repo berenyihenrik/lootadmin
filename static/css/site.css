@@ -1,0 +1,81 @@
+h1 {
+    font-family: Lato;
+    color: white;
+
+}
+body {
+    background-color: #222;
+}
+
+button, [type=submit] {
+    
+        border-radius: .3rem;
+        
+        display: inline-block;
+        
+        text-align: center;
+        vertical-align: middle;
+        
+        background-color: white;
+        border: 1px solid transparent;
+        padding: .375rem .75rem;
+        font-size: .9375rem;
+        line-height: 1.5;
+        
+        color: #fff;
+        background-color: white;
+        border-color: white;
+    
+        
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+
+.btn-createtable, .btn-submit, .btn-append {
+    background-color: #3160f7;
+    border-color: #3160f7;
+}
+
+.btn-createtable:hover, .btn-submit:hover, .btn-append:hover {
+    background-color: #313ff7;
+    border-color: #313ff7;
+}
+
+.btn-linkbutton {
+    background-color: #0bde19;
+    border-color: #0bde19;
+}
+
+.btn-linkbutton:hover {
+    background-color: #06c713;
+    border-color: #06c713;
+}
+
+.tables {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.row {
+    align-items:center;
+    justify-content: center;
+}
+
+.input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-control{
+    resize: none;
+}
+
+
+
+
+
+
+
+

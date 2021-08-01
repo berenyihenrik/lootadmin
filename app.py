@@ -155,7 +155,7 @@ def input():
 
             return redirect(url_for("loot"))
 
-        return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input class="button" type="submit" value="Submit"></form>'
+        return render_template("input.html")
 
     else:
         return redirect("/login")
@@ -178,7 +178,7 @@ def append():
         else:
             print(session.get('table'))
 
-        return '<form method="POST"> <textarea class="textbox" type="textarea" name="loot_csv" placeholder="paste CSV here"> </textarea> <input type="hidden" name="tableid" value="{0}"> <input class="button" type="submit" value="Submit"></form>'.format(request.args.get("tableid"))
+        return render_template("append.html")
 
     else:
         return redirect("/login")
