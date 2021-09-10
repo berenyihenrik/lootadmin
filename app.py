@@ -114,26 +114,24 @@ def logout():
 def home():
     if checkLogin(request, users):
         return redirect(url_for("tables"))
-    else:
-        return redirect("/login")
+
+    return redirect("/login")
 
 @app.route("/tables", methods=['GET', 'POST'])
 def tables():
     if checkLogin(request, users):
         if request.method == 'POST':
             return redirect(url_for("input"))
-        else:
-            tables = []
-            user = users_db.query.filter_by(id=request.cookies['id']).first()
-            table = lootTables_db.query.filter_by(userid=user.id).all()
-            for i in range(len(table)):
-                tables.append(table[i].tableid)
 
-            return render_template("tables.html", tables=tables)
+        tables = []
+        user = users_db.query.filter_by(id=request.cookies['id']).first()
+        table = lootTables_db.query.filter_by(userid=user.id).all()
+        for i in range(len(table)):
+            tables.append(table[i].tableid)
 
-    else:
-        return redirect("/login")
+        return render_template("tables.html", tables=tables)
 
+    return redirect("/login")
 
 @app.route("/input", methods=['GET', 'POST'])
 def input():
@@ -157,8 +155,7 @@ def input():
 
         return render_template("input.html")
 
-    else:
-        return redirect("/login")
+    return redirect("/login")
 
 @app.route("/append", methods=['GET', 'POST'])
 def append():
@@ -175,13 +172,11 @@ def append():
             session['table'] = table.tableid
 
             return redirect(url_for("loot"))
-        else:
-            print(session.get('table'))
 
+        print(session.get('table'))
         return render_template("append.html")
 
-    else:
-        return redirect("/login")
+    return redirect("/login")
 
 @app.route("/loot/", methods=['GET', 'POST'])
 def loot():
@@ -191,12 +186,10 @@ def loot():
 
             return redirect(url_for("loot"))
 
-        else:
-            print("NONE", session.get('table'))
-            characters, dates = readDB(session.get('table'))
-            print(characters)
-
-            return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
+        print("NONE", session.get('table'))
+        characters, dates = readDB(session.get('table'))
+        print(characters)
+        return render_template('loot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
 
     else:
         return redirect("/login")
@@ -209,8 +202,9 @@ def shared():
         if lootTables_db.query.filter_by(tableid=tableid).first().shareable == 1:
             characters, dates = readDB(tableid)
             return render_template('sharedloot.html', characters=characters, len=len(characters), dates=dates, datelen=len(dates))
-        else:
-            return 'THIS TABLE IS ONLY AVAILABLE TO THE OWNER'
+
+        return 'THIS TABLE IS ONLY AVAILABLE TO THE OWNER'
+
     except:
         return 'INVALID TABLE ID'
 
@@ -218,5 +212,4 @@ def shared():
 if __name__ == "__main__":
     db.create_all()
     app.run(host='0.0.0.0', ssl_context="adhoc")
-
-
+    

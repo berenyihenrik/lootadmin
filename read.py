@@ -67,7 +67,7 @@ def readrawcsv(stringio, tableid = None):
                 if characters[j][0] == rows[i][0]:
                     characters[j][dates.index(rows[i][1]) + 1].append(rows[i][5])
 
-    if tableid == None:
+    if tableid is None:
         table = lootTables_db.query.order_by(text("loot_tables_db.tableid DESC")).first()
         tableid = table.tableid
     print(tableid)
