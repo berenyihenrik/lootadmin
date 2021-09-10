@@ -10,11 +10,11 @@ import os
 from read import *
 from database import *
 
-# Configuration
-CLIENT_ID = "841369937188487199"
-CLIENT_SECRET = "FfN8yhGDUcg9ZwmqgIYzMTTeVRBByt9A"
-
-REDIRECT = 'https://discord.com/api/oauth2/authorize?client_id=841369937188487199&redirect_uri=https%3A%2F%2F0.0.0.0%3A5000%2Flogin%2Fcallback&response_type=code&scope=identify'
+# Environment Variables
+CLIENT_ID = os.getenv('LA_CLIENT_ID')
+CLIENT_SECRET = os.getenv('LA_CLIENT_SECRET')
+REDIRECT = os.getenv('LA_REDIRECT')
+CALLBACK = os.getenv('LA_CALLBACK')
 
 # Flask app setup
 app = Flask(__name__)
@@ -71,7 +71,7 @@ def callback():
         'client_secret': CLIENT_SECRET,
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': 'https://0.0.0.0:5000/login/callback'
+        'redirect_uri': CALLBACK
    }
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
