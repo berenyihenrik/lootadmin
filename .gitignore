@@ -1,0 +1,4 @@
+.DS_Store
+flask_session
+__pycache__
+identifier.sqlite
