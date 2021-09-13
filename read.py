@@ -1,6 +1,6 @@
 import csv
 from sqlalchemy import text
-from database import *
+from models import *
 from validate import *
 
 def readcsv(filename):
