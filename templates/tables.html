@@ -1,39 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <!-- Wowhead tooltip script -->
-        <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
-        <script src="https://wow.zamimg.com/widgets/power.js"></script>
+<head>
+  <!-- Wowhead tooltip script -->
+  <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true};</script>
+  <script src="https://wow.zamimg.com/widgets/power.js"></script>
         
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
             
-        <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+  <!-- Stylesheets -->
+  <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
 
-       <title>Lootadmin</title>
-    </head>
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
+
+  <title>Lootadmin</title>
+</head>
     
-    <body>
-        <div class="tables">
+<body>
+  <div class="tables">
         
-       <h1>You have {{tables|length}} tables</h1>
+    <h1>You have {{tables|length}} tables</h1>
        
-       {% for i in range(tables|length) %}
-       <form method="POST" action="{{ url_for('loot') }}">
-        <input type="hidden" name="table" value="{{tables[i]}}">
-         <button type="submit" name="table" value="{{i}}" class="btn-linkbutton">
-           {{i+1}}
-         </button>
-       </form>
-       {% endfor %}
-    
+    {% for i in range(tables|length) %}
+    <form method="POST" action="{{ url_for('loot') }}">
+      <input type="hidden" name="table" value="{{tables[i]}}">
+      <button type="submit" name="table" value="{{i}}" class="btn-linkbutton">
+          {{i+1}}
+      </button>
+    </form>
+    {% endfor %}
 
+    <form method="POST"> <input class="btn-createtable" type="submit" value="Create new table">
+    </form>
        
-       <form method="POST"> <input class="btn-createtable" type="submit" value="Create new table"></form>
-       
-        </div>
+  </div>
 
-    </body>
+</body>
 </html>
