@@ -2,3 +2,4 @@
 flask_session
 __pycache__
 identifier.sqlite
+launch.json

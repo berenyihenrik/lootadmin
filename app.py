@@ -5,7 +5,7 @@ import os
 
 # Flask app setup
 app = Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = True # you probably should not use this on a production server
 app.config['SESSION_TYPE'] = 'filesystem'  # Specifies the token cache should be stored in server-side session
 Session(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
