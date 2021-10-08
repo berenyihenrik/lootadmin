@@ -3,42 +3,6 @@ from sqlalchemy import text
 from models import *
 from validate import *
 
-def readcsv(filename):
-    with open(filename, 'r') as file:
-        reader = csv.reader(file)
-        rows = []
-        for row in reader:
-            rows.append(row)
-
-        dates = []
-        for i in range(1, len(rows)):
-            if rows[i][1] not in dates:
-                dates.append(rows[i][1])
-        # print(dates)
-
-        characters = []
-        character = []
-        for i in range(1, len(rows)):
-            if arrayContains(rows[i][0], characters):
-                character.append(rows[i][0])
-                # character.append(rows[i][1])
-                for j in range(len(dates)):
-                    character.append([])
-
-                character[dates.index(rows[i][1])+1].append(rows[i][5])
-
-                characters.append(character)
-                character = []
-            else:
-                for j in range(len(characters)):
-                    if characters[j][0] == rows[i][0]:
-                        characters[j][dates.index(rows[i][1])+1].append(rows[i][5])
-
-
-        # print(characters)
-        file.close()
-        return characters, dates
-
 def readrawcsv(stringio, tableid = None):
     reader = csv.reader(stringio)
     rows = []
@@ -60,6 +24,8 @@ def readrawcsv(stringio, tableid = None):
 
             character[dates.index(rows[i][1]) + 1].append(rows[i][5])
 
+            character[0] = removeServer(character[0])
+
             characters.append(character)
             character = []
         else:
@@ -73,12 +39,9 @@ def readrawcsv(stringio, tableid = None):
     print(tableid)
 
     for i in range(1, len(rows)):
-
-        loot = loot_db(tableid, rows[i][0], rows[i][1], rows[i][5])
+        loot = loot_db(tableid, removeServer(rows[i][0]), rows[i][1], rows[i][5])
         db.session.add(loot)
     db.session.commit()
-
-    # return characters, dates
 
 def readDB(tableid):
     rows = []
